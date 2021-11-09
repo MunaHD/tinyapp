@@ -46,6 +46,7 @@ app.get("/urls/new", (req, res) => {
 
 app.get("/urls/:shortURL", (req, res) => {
   const templateVariables = { shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  
   res.render("urls_show", templateVariables);
 });
 
@@ -54,7 +55,9 @@ app.get("/hello", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
+
   const longURL = urlDatabase[req.params.shortURL]
+  
   res.redirect(longURL);
 });
 
@@ -64,11 +67,23 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${generateRandomString()}`);         // Respond with 'Ok' (we will replace this)
 });
 
+app.post("/urls/:shortURL", (req, res) => {
+  const shortURL = req.params.shortURL;
+  const long = req.body.longURL;
+  //console.log(long)
+
+  urlDatabase[shortURL] = long
+  
+
+  res.redirect("/urls")
+
+});
+
 app.post("/urls/:shortURL/delete", (req, res)=> {
-   const shortURL = req.params.shortURL;
+   let shortURL = req.params.shortURL;
+
    delete urlDatabase[shortURL];
-   
-   res.redirect('/urls')
+   res.redirect("/urls")
 });
 
 app.listen(PORT, () => {

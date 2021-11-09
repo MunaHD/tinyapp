@@ -1,6 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
+    <style>
+      .button {
+          border: 2px solid;
+          border-color: #f44336;
+          background-color: #ffffff;
+          color: #f44336;
+          padding: 10px 28px;
+          text-align: center;
+          text-decoration: none;
+          display: inline-block;
+          font-size: 18px;
+          cursor: pointer;
+          border-radius: 5px;
+        }
+    </style>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   
@@ -18,6 +33,7 @@
         <tr>
           <th scope="col">Short URL</th>
           <th scope="col">Long URL</th>
+          <th scope="col">Delete</th>
         </tr>
       </thead>
       <tbody>
@@ -25,6 +41,12 @@
           <tr>
             <td><%= url %></td>
             <td><%= urls[url] %></td>
+            <td><form method="POST" action="/urls/<%= url %>/delete">
+              <button type="submit" class="button" >Delete</button>
+            </form>
+            </td>
+           
+            
           </tr>
         <% } %>
       </tbody>

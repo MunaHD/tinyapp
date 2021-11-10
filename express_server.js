@@ -31,31 +31,29 @@ function generateRandomString() {
   }
   return randomStr;
 }
-
+//shows hello on the home page
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
-app.get("/urls", (req, res) => {
-  const templateVariables = {username: req.cookies["username"], urls: urlDatabase };
-  res.render("urls_index", templateVariables);
+// prints hello to page
+app.get("/hello", (req, res) => {
+  res.send("<html><body>Hello <b>World</b></body></html>\n");
 });
 
+
+
+
+
+
+//shows the page to create new short url
 app.get("/urls/new", (req, res) => {
   const templateVariables = {username: req.cookies["username"]}
   res.render("urls_new", templateVariables);
 });
 
-app.get("/urls/:shortURL", (req, res) => {
-  const templateVariables = {username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
-  
-  res.render("urls_show", templateVariables);
-});
 
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
-
+//create link that shortURL leads to
 app.get("/u/:shortURL", (req, res) => {
 
   const longURL = urlDatabase[req.params.shortURL]
@@ -63,6 +61,17 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
 });
 
+
+
+
+
+
+
+//shows the page that lists urls
+app.get("/urls", (req, res) => {
+  const templateVariables = {username: req.cookies["username"], urls: urlDatabase };
+  res.render("urls_index", templateVariables);
+});
 //create shortURL
 app.post("/urls", (req, res) => {
   urlDatabase[generateRandomString()]= req.body.longURL
@@ -70,7 +79,21 @@ app.post("/urls", (req, res) => {
   res.redirect(`/urls/${generateRandomString()}`);         // Respond with 'Ok' (we will replace this)
 });
 
-//create link that shortURL leads to
+
+
+
+
+
+
+
+//shows short url page
+app.get("/urls/:shortURL", (req, res) => {
+  const templateVariables = {username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  
+  res.render("urls_show", templateVariables);
+});
+
+//updates the long url and saves it 
 app.post("/urls/:shortURL", (req, res) => {
   const shortURL = req.params.shortURL;
   const long = req.body.longURL;
@@ -79,6 +102,11 @@ app.post("/urls/:shortURL", (req, res) => {
   urlDatabase[shortURL] = long
   res.redirect("/urls")
 });
+
+
+
+
+
 
 //delete urls
 app.post("/urls/:shortURL/delete", (req, res)=> {
@@ -91,7 +119,17 @@ app.post("/urls/:shortURL/delete", (req, res)=> {
 
 
 
-// gimme the COOOOOKIES
+
+
+
+
+
+/*       GIVE
+          ME
+          THE
+        COOKIES
+*/  
+
 
 //add cookie (username)
 app.post("/login", (req, res)=> {
@@ -109,6 +147,9 @@ app.post("/logout", (req, res)=> {
 
   res.redirect("/urls")
 });
+
+
+
 
 
 app.listen(PORT, () => {

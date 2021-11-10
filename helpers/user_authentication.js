@@ -1,3 +1,4 @@
+//generate random string
 function generateRandomString() {
   // how many times I want to run the loop
   let loop = 2; 
@@ -17,4 +18,16 @@ function generateRandomString() {
   return randomStr;
 }
 
-module.exports = { generateRandomString }
+//create new user
+const createNewUser = (users, userObject) => {
+  if (!users[userObject.email]) {
+    users[userObject.id] = userObject
+    return userObject
+  }
+  return null
+}
+
+
+
+
+module.exports = { generateRandomString, createNewUser }

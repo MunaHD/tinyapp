@@ -196,15 +196,14 @@ app.get("/login", (req, res) => {
 });
 
 
-//add cookie (username)
+//add cookie (user_id)
 app.post("/login", (req, res)=> {
   
-  let username = req.body.username
-  res.cookie("username", username)
-  
+
   if(!findUserbyEmail(req.body.email)) {
     return res.status(403).send(' A user with this email does not exist');
   }
+
   const userValue = findUserbyEmail(req.body.email)
 
   if(findUserbyEmail(req.body.email)) {
@@ -212,6 +211,7 @@ app.post("/login", (req, res)=> {
     return res.status(403).send(' The pasword is incorrect!');
   }
   
+
   //after succssful login assign cookie
   res.cookie("user_id", userValue.id)
   res.redirect("/urls")
@@ -221,10 +221,11 @@ app.post("/login", (req, res)=> {
 
 
 
-//delete cookie (username)
+//delete cookie (user
 app.post("/logout", (req, res)=> {
-  let username = req.body.username
-  res.clearCookie('username', username)
+ 
+  
+  res.clearCookie('user_id')
 
   res.redirect("/urls")
 });

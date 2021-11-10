@@ -1,4 +1,29 @@
 <header>
+  <style>
+    .button {
+      position: absolute;
+      right: 5px;
+        border: 2px solid;
+        border-color: #5b6c53;
+        background-color: #ffffff;
+        color: #5b6c53;
+        padding: 0px 15px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 18px;
+        cursor: pointer;
+        border-radius: 5px;
+      }
+      h4 {
+      float: right;
+
+      text-align: right;
+      font-size: 18px;
+      padding: 8px 35px; 
+      }
+
+  </style>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
     <a class="navbar-brand" href="/urls">TinyApp</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
@@ -8,6 +33,21 @@
       <div class="navbar-nav">
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
+        <a class="nav-item nav-link" href="/urls/login">Login</a>
+        <% if(!username) { %>
+
+        <form method="POST" action="/login">
+          <input name="username" value="Username" />
+          <button type="submit" class="button" >Login</button>
+        </form>
+        
+        <% } else{ %>
+        <h4> Logged in as: <%= username %> </h4>
+        <form method="POST" action="/logout">
+          <button type="submit" class="button" >Logout</button>
+        </form>
+        
+        <% } %>
       </div>
     </div>
   </nav>

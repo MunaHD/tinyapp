@@ -1,7 +1,6 @@
 <header>
   <style>
     .button {
-
         border: 2px solid;
         border-color: #5b6c53;
         background-color: #ffffff;
@@ -14,12 +13,11 @@
         cursor: pointer;
         border-radius: 5px;
       }
-      h4 {
-      float: right;
-      text-align: right;
-      font-size: 18px;
-      padding: 8px 35px; 
-      }
+    .label {
+      letter-spacing: .1rem;
+      color: rgb(254, 254, 254);
+      font-family: Helvetica, Arial, sans-serif;
+    }
       
   </style>
   <nav class="navbar navbar-expand-md navbar-dark bg-success">
@@ -32,33 +30,25 @@
       <div class="navbar-nav" >
         <a class="nav-item nav-link" href="/urls">My URLs</a>
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
-        <a class="nav-item nav-link" href="/urls/login">Login</a>
-        
       </div>
 
       <div class="ml-auto "> 
-        <% if(!username) { %>
-  
-          <form method="POST" action="/login">
-            <input name="username" value="Username" />
-            <button type="submit" class="button" >Login</button>
+        <% if(user) { %>
+          
+          <form method="POST" action="/logout">
+              <label class="label"> Logged in as: <%= user.email %>!</label>
+              <button type="submit" class="button" >Logout</button>
           </form>
           
           <% } else{ %>
+      
+          <a class="button" href="/login">Login</a>
+          <a class="button" href="/register">Register</a>
           
-          <form method="POST" action="/logout">
-            <span>Logged in as: <%= username %></span>
-            <button type="submit" class="button" >Logout</button>
-          </form>
           
           <% } %>
           
         </div>
-
-      
-      
-      
-  
     </div>
   </nav>
 </header>

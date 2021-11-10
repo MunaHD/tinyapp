@@ -1,7 +1,7 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-
+const { generateRandomString } = require('./helpers/randomstring')
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
 const cookieParser = require('cookie-parser')
@@ -13,24 +13,23 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
-function generateRandomString() {
-  // how many times I want to run the loop
-  let loop = 2; 
-  //variable to hold the random string
-  let randomStr = ''
-  while(loop > 0) {
-   //random uppercase letter
-   let randomUpperLett = String.fromCharCode(97+Math.floor(Math.random() * 26));
-   //random number between 0 -9
-   let randomNum = Math.floor(Math.random() * 10);
-   //random lowercase letter
-   let randomLowerLett = String.fromCharCode(65+Math.floor(Math.random() * 26));
-   //add all them to the random string (with this we have 3 out of 6 characters)
-   randomStr += randomUpperLett + randomNum + randomLowerLett;
-   loop --; 
+const users = {
+  "userRandomID": {
+    id: "userRandomID", 
+    email: "user@example.com", 
+    password: "purple-monkey-dinosaur"
+  },
+ "user2RandomID": {
+    id: "user2RandomID", 
+    email: "user2@example.com", 
+    password: "dishwasher-funk"
   }
-  return randomStr;
+
 }
+
+
+
+
 //shows hello on the home page
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -103,6 +102,13 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls")
 });
 
+
+
+app.get("/register", (req,res) => {
+  const templateVariables = {username: req.cookies["username"], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+ 
+  res.render("register", templateVariables);
+});
 
 
 

@@ -56,11 +56,25 @@ const urlsForUser = (id) => {
   let userUrl = {};
   for (let key in urlDatabase) {
     if (urlDatabase[key].userID === id) {
-       userUrl[key] = urlDatabase[key]
+      userUrl[key] = urlDatabase[key]
     }
   }
   return userUrl
 }
+
+
+
+
+//shows hello on the home page
+app.get("/", (req, res) => {
+   //if user is looged in redirect to urls
+   const userCookieId = req.session.user_id 
+   if (!userCookieId) {
+    return res.redirect("/login")
+  }
+  res.redirect("/urls");
+});
+
 
 
 
@@ -126,22 +140,6 @@ app.post("/register", (req, res) => {
 
 
 
-
-
-
-
-
-
-//shows hello on the home page
-app.get("/", (req, res) => {
-  res.send("Hello! This is the home page");
-});
-
-// // prints hello to page
-// app.get("/hello", (req, res) => {
-//   res.send("<html><body>Hello <b>World</b></body></html>\n");
-// });
-
 //shows the page to create new short url
 app.get("/urls/new", (req, res) => {
    //if user is looged in redirect to urls
@@ -157,18 +155,15 @@ app.get("/urls/new", (req, res) => {
 
 //create link that shortURL leads to
 app.get("/u/:shortURL", (req, res) => {
+  const shortUrl = req.params.shortURL
   
-  const longURL = urlDatabase[req.params.shortURL].longURL
-
-  if (!urlDatabase[req.params.shortURL]) {
+  if (!urlDatabase[shortUrl]) {
     return res.status(404).send("The shortURL you are trying to reach does not exist")
   }
 
+  const longURL = urlDatabase[shortUrl].longURL
   res.redirect(longURL);
 });
-
-
-
 
 
 
@@ -208,27 +203,31 @@ app.post("/urls", (req, res) => {
 
 
 
-
 //shows short url page
 app.get("/urls/:shortURL", (req, res) => {
   const userCookieId = req.session.user_id 
+  const shortUrl = req.params.shortURL; 
   let userUrls = urlsForUser(userCookieId)
 
   const templateVariables = {user: users[userCookieId], shortURL: req.params.shortURL, longURL: userUrls.longURL };
   
-  // //if user is not logged in
-  // if (!userCookieId ) {
-  //   //throw new Error('Please log in')
-  //   return res.status(401).send("Please login before accessing this page")
-  // }
+   if (!urlDatabase[shortUrl]) {
+     //throw new Error('Please log in')
+    return res.status(404).send("ShortURL does not exist")
+   }
+
+  //if user is not logged in
+  if (!userCookieId ) {
+    //throw new Error('Please log in')
+    return res.status(401).send("Please login before accessing this page")
+  }
   
-  // //if the short URL does not exist at all in any database
-  // if (!userUrls[req.params.shortURL] || urlDatabase[req.params.shortURL]){
-  //   return res.status(404).send("This ShortURL does not exist")
-  // }
-  //if user is signed in but this is not their url
+ 
+
+  //if user is logged in doesnt own url 
   if(userCookieId) {
-    if (!userUrls[req.params.shortURL]) {
+    //does not own  url then redirect to urls/:id
+    if (!userUrls[shortUrl]) {
       //throw new Error('This shortURL does not belong to you!')
       return res.status(403).send("This shortURL does not belong to you!")
     }
@@ -236,6 +235,10 @@ app.get("/urls/:shortURL", (req, res) => {
 
   res.render("urls_show", templateVariables);
 });
+
+
+
+
 
 //updates the long url and saves it 
 app.post("/urls/:shortURL", (req, res) => {

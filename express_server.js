@@ -38,16 +38,29 @@ const users = {
 
 const findUserbyEmail = (email) => {
   for (key in users) {
-    console.log("users key", users[key].email)
+    //console.log("users key", users[key].email)
     if (users[key].email === email) {
       return users[key]
     }
   } return false;
 }
 
+const urlsForUser = (id) => {
+  let userUrl = {};
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+       userUrl[key] = urlDatabase[key]
+    }
+  }
+  return userUrl
+}
 
 
 
+// function belongs to user
+// //checks current users urls if the shorturl user  wants to delete is not there's
+// //then we return error
+// const belongToUser = (shortURL, )
 
 
 
@@ -55,7 +68,7 @@ const findUserbyEmail = (email) => {
 
 app.get("/register", (req,res) => {
   //if user is looged in redirect to urls
-  if (req.cookies["user_id"] ) {
+  if (req.cookies["user_id"]) {
     return res.redirect("/urls")
   }
 
@@ -73,19 +86,22 @@ app.post("/register", (req, res) => {
     password: req.body.password,
   }
   
-  
-
+   //check if the password and email are empty
   if (req.body.email === '' || req.body.password === ''){
-    
     return res.status(400).send('Email/Password is empty. Please try again!');
   }
+
+
    //console.log("user email", user.email)
   if(findUserbyEmail(req.body.email)) {
 
     return res.status(400).send(' A user already exists with this email!');
   }
+  //create user 
   const user = createNewUser(users, userObject)
   users[id] = userObject
+
+
   //if user exists then assign cookie
   if (user) {
     res.cookie("user_id", user.id)
@@ -93,7 +109,7 @@ app.post("/register", (req, res) => {
     console.log(res.cookie)
     return res.redirect("/urls")
   }
-  //let templateVar = {}
+  
   res.redirect("/register")
 
 });
@@ -114,17 +130,18 @@ app.get("/", (req, res) => {
   res.send("Hello! This is the home page");
 });
 
-// prints hello to page
-app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
-});
+// // prints hello to page
+// app.get("/hello", (req, res) => {
+//   res.send("<html><body>Hello <b>World</b></body></html>\n");
+// });
 
 //shows the page to create new short url
 app.get("/urls/new", (req, res) => {
    //if user is looged in redirect to urls
    if (!req.cookies["user_id"] ) {
-    res.redirect("/login")
+    return res.redirect("/login")
   }
+
   const templateVariables = {user: users[req.cookies["user_id"]]}
   res.render("urls_new", templateVariables);
 });
@@ -138,7 +155,7 @@ app.get("/u/:shortURL", (req, res) => {
   if (!urlDatabase[req.params.shortURL]) {
     return res.status(404).send("The shortURL you are trying to reach does not exist")
   }
-  
+
   res.redirect(longURL);
 });
 
@@ -152,20 +169,31 @@ app.get("/u/:shortURL", (req, res) => {
 
 //shows the page that lists urls
 app.get("/urls", (req, res) => {
-  const templateVariables = {user: users[req.cookies["user_id"]], urls: urlDatabase };
+  
+   //if user is looged in redirect to urls
+   if (!req.cookies["user_id"] ) {
+    return res.status(401).send("Please login before accessing this page")
+  }
+
+  
+
+  // console.log(users[req.cookies["user_id"]])
+  const templateVariables = {user: users[req.cookies["user_id"]], urls: urlsForUser(req.cookies["user_id"]) };
   //res.json(users)
   //res.json(users[req.cookies["user_id"]])
   res.render("urls_index", templateVariables);
 });
 //create shortURL
 
-
+       
 app.post("/urls", (req, res) => {
-  
-  urlDatabase[generateRandomString()]= req.body.longURL
+  let random = generateRandomString()
+
+  urlDatabase[random]= {longURL: req.body.longURL, userID: req.cookies["user_id"] }
   //console.log(req.body); 
   
-  res.redirect("/urls") ///${generateRandomString()}
+  
+  res.redirect("/urls") ///${random}
   
 });
 
@@ -178,8 +206,28 @@ app.post("/urls", (req, res) => {
 
 //shows short url page
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVariables = {user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: urlDatabase[req.params.shortURL] };
+  let userUrls = urlsForUser(req.cookies["user_id"])
+
+  const templateVariables = {user: users[req.cookies["user_id"]], shortURL: req.params.shortURL, longURL: userUrls.longURL };
   
+  // //if user is not logged in
+  // if (!req.cookies["user_id"] ) {
+  //   //throw new Error('Please log in')
+  //   return res.status(401).send("Please login before accessing this page")
+  // }
+  
+  // //if the short URL does not exist at all in any database
+  // if (!userUrls[req.params.shortURL] || urlDatabase[req.params.shortURL]){
+  //   return res.status(404).send("This ShortURL does not exist")
+  // }
+  //if user is signed in but this is not their url
+  if(req.cookies["user_id"]) {
+    if (!userUrls[req.params.shortURL]) {
+      //throw new Error('This shortURL does not belong to you!')
+      return res.status(403).send("This shortURL does not belong to you!")
+    }
+  }
+
   res.render("urls_show", templateVariables);
 });
 
@@ -189,11 +237,13 @@ app.post("/urls/:shortURL", (req, res) => {
    if (!req.cookies["user_id"] ) {
     throw new Error('Can\'t edit URL until you log in')
   }
+
+  
   const shortURL = req.params.shortURL;
-  const long = req.body.longURL;
+  //const long = req.body.longURL;
   //console.log(long)
 
-  urlDatabase[shortURL] = long
+  urlDatabase[shortURL] = {longURL: req.body.longURL, userID: req.cookies["user_id"] }
   res.redirect("/urls")
 });
 
@@ -205,6 +255,9 @@ app.post("/urls/:shortURL", (req, res) => {
 
 //delete urls
 app.post("/urls/:shortURL/delete", (req, res)=> {
+  if (!req.cookies["user_id"] ) {
+    throw new Error('Can\'t delete URL since you don\'t own it!')
+  }
    let shortURL = req.params.shortURL;
 
    delete urlDatabase[shortURL];
@@ -219,7 +272,7 @@ app.post("/urls/:shortURL/delete", (req, res)=> {
 app.get("/login", (req, res) => { 
    //if user is looged in redirect to urls
    if (req.cookies["user_id"] ) {
-    res.redirect("/urls")
+    return res.redirect("/urls")
   }
   const templateVariables = {user: users[req.cookies["user_id"]]}
   res.render("login", templateVariables);
@@ -245,6 +298,7 @@ app.post("/login", (req, res)=> {
 
   //after succssful login assign cookie
   res.cookie("user_id", userValue.id)
+
   res.redirect("/urls")
 });
 

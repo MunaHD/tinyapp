@@ -10,8 +10,14 @@ app.set("view engine", "ejs");
 
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b6UTxQ": {
+        longURL: "https://www.tsn.ca",
+        userID: "aJ48lW"
+  },
+  "i3BoGr": {
+        longURL: "http://www.google.com",
+        userID: "aJ48lW"
+  }
 };
 
 const users = {
@@ -48,6 +54,11 @@ const findUserbyEmail = (email) => {
 
 
 app.get("/register", (req,res) => {
+  //if user is looged in redirect to urls
+  if (req.cookies["user_id"] ) {
+    return res.redirect("/urls")
+  }
+
   const templateVariables = {user: users[req.cookies["user_id"]]}
   res.render("register", templateVariables);
 });
@@ -110,6 +121,10 @@ app.get("/hello", (req, res) => {
 
 //shows the page to create new short url
 app.get("/urls/new", (req, res) => {
+   //if user is looged in redirect to urls
+   if (!req.cookies["user_id"] ) {
+    res.redirect("/login")
+  }
   const templateVariables = {user: users[req.cookies["user_id"]]}
   res.render("urls_new", templateVariables);
 });
@@ -117,8 +132,12 @@ app.get("/urls/new", (req, res) => {
 
 //create link that shortURL leads to
 app.get("/u/:shortURL", (req, res) => {
+  
+  const longURL = urlDatabase[req.params.shortURL].longURL
 
-  const longURL = urlDatabase[req.params.shortURL]
+  if (!urlDatabase[req.params.shortURL]) {
+    return res.status(404).send("The shortURL you are trying to reach does not exist")
+  }
   
   res.redirect(longURL);
 });
@@ -139,11 +158,14 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVariables);
 });
 //create shortURL
+
+
 app.post("/urls", (req, res) => {
-  urlDatabase[generateRandomString()]= req.body.longURL
-  console.log(req.body);  // Log the POST request body to the console
   
-  res.redirect(`/urls/${generateRandomString()}`);         // Respond with 'Ok' (we will replace this)
+  urlDatabase[generateRandomString()]= req.body.longURL
+  //console.log(req.body); 
+  
+  res.redirect("/urls") ///${generateRandomString()}
   
 });
 
@@ -163,6 +185,10 @@ app.get("/urls/:shortURL", (req, res) => {
 
 //updates the long url and saves it 
 app.post("/urls/:shortURL", (req, res) => {
+   //if user is looged in return error message
+   if (!req.cookies["user_id"] ) {
+    throw new Error('Can\'t edit URL until you log in')
+  }
   const shortURL = req.params.shortURL;
   const long = req.body.longURL;
   //console.log(long)
@@ -191,6 +217,10 @@ app.post("/urls/:shortURL/delete", (req, res)=> {
 
 
 app.get("/login", (req, res) => { 
+   //if user is looged in redirect to urls
+   if (req.cookies["user_id"] ) {
+    res.redirect("/urls")
+  }
   const templateVariables = {user: users[req.cookies["user_id"]]}
   res.render("login", templateVariables);
 });
@@ -199,6 +229,7 @@ app.get("/login", (req, res) => {
 //add cookie (user_id)
 app.post("/login", (req, res)=> {
   
+ 
 
   if(!findUserbyEmail(req.body.email)) {
     return res.status(403).send(' A user with this email does not exist');

@@ -13,9 +13,15 @@ TinyApp is a full stack web application built with Node and Express that allows 
 
 ## Final Product
 
-!["screenshot description"](#)
+!["screenshot of user URLs page"](https://github.com/MunaHD/tinyapp/blob/master/docs/urls-page.png?raw=true)
 
-!["screenshot description"](#)
+!["screenshot of edit URLs page"](https://github.com/MunaHD/tinyapp/blob/master/docs/edit-url.png?raw=true)
+
+!["screenshot of create cew URL page"](https://github.com/MunaHD/tinyapp/blob/master/docs/new-url.png?raw=true)
+
+!["screenshot of register page"](https://github.com/MunaHD/tinyapp/blob/master/docs/register.png?raw=true)
+
+
 
 ## Dependencies
 

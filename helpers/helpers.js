@@ -1,3 +1,5 @@
+const { urlDatabase } = require('../data/userData')
+
 //generate random string
 function generateRandomString() {
   // how many times I want to run the loop
@@ -28,14 +30,23 @@ const createNewUser = (users, userObject) => {
 }
 
 const findUserbyEmail = (email, users) => {
-  for (key in users) {
+  for (let key in users) {
     //console.log("users key", users[key].email)
     if (users[key].email === email) {
       return key
     }
   } 
 }
+const urlsForUser = (id) => {
+  let userUrls = {};
+  for (let key in urlDatabase) {
+    if (urlDatabase[key].userID === id) {
+      userUrls[key] = urlDatabase[key]
+    }
+  }
+  return userUrls
+}
 
 
 
-module.exports = { generateRandomString, createNewUser, findUserbyEmail }
+module.exports = { generateRandomString, createNewUser, findUserbyEmail, urlsForUser }

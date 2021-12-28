@@ -5,6 +5,7 @@ const bodyParser     = require("body-parser");
 const cookieParser   = require('cookie-parser');
 const cookieSession  = require('cookie-session');
 const bcrypt         = require('bcryptjs');
+const methodOverride  = require('method-override');
 const {
   generateRandomString,
   createNewUser,
@@ -14,6 +15,7 @@ const {
 const { urlDatabase, users } = require('./data/userData');
 
 
+app.use(methodOverride('_method'));
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 app.set("view engine", "ejs");
@@ -215,7 +217,7 @@ app.post("/urls", (req, res) => {
 
 
 //updates the long url and saves it
-app.post("/urls/:shortURL", (req, res) => {
+app.put("/urls/:shortURL", (req, res) => {
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
 
@@ -237,7 +239,7 @@ app.post("/urls/:shortURL", (req, res) => {
 
 
 //delete urls
-app.post("/urls/:shortURL/delete", (req, res)=> {
+app.delete("/urls/:shortURL", (req, res)=> {
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
   

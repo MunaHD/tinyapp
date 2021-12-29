@@ -18,6 +18,10 @@
         cursor: pointer;
         border-radius: 5px;
       }
+      .url-info {
+        display: flex;
+        justify-content: space-between;
+      }
   </style>
 </head>
 
@@ -41,8 +45,16 @@
                       <input name="longURL"  value="http://" style="width: 300px; margin: 1em"/>
                       <button class="button" type="submit"> Update </button>
                     </form>
-                    
-                   </div>
+                    <div class="url-info">
+                      <label> URL views: <%= visits %> </label>
+                      <ul>
+                        <% for (let i of date) { %>
+                          <li> Date visited: <%= i %> User: <%= user.id %>  </label>
+                        <% } %>
+                      </ul>    
+                      <label> Visitors: <%= visitors.length %> </label>
+                    </div>
+                  </div>
                 </div>
              </div>
           </div>

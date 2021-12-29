@@ -79,11 +79,38 @@ app.get("/urls/new", (req, res) => {
 //create link that shortURL leads to
 app.get("/u/:shortURL", (req, res) => {
   const shortUrl = req.params.shortURL;
-  
+ 
   if (!urlDatabase[shortUrl]) {
     return res.status(404).send("The shortURL you are trying to reach does not exist");
   }
-
+  
+  // variable to hold the array of unique visitors
+  const uniqVisitors = urlDatabase[shortUrl]['visitors'];
+  // if the user doesnt have a cookie as an id create a random id
+  if (!req.session.visitor) {
+    req.session.visitor = generateRandomString();
+  }
+  // visitors have unique session id
+  const visitor = req.session.visitor;
+  // function to check if the visitor is in the visitor array
+  const isUniqueVisitor = (visitorsArr, visitor) => {
+    for (const i of visitorsArr) {
+      if (i === visitor) {
+        return false;
+      }
+    }
+    return true;
+  };
+  // add a visitor to the array if they don't exist already
+  if (isUniqueVisitor(uniqVisitors, visitor)) {
+    urlDatabase[shortUrl]['visitors'].push(visitor);
+  }
+  // increment the view evry time the link is clicked
+  urlDatabase[shortUrl]['visits']++;
+  // add the timestamp for ehen the link was clicked
+  urlDatabase[shortUrl]['date'].push(Math.floor(Date.now() / 1000));
+  
+  
   const longURL = urlDatabase[shortUrl].longURL;
   res.redirect(longURL);
 });
@@ -109,12 +136,14 @@ app.get("/urls", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const userId = req.session.user_id;
   const shortURL = req.params.shortURL;
-
-
+  
   const templateVariables = {
     user: users[userId],
-    shortURL: shortURL ,
-    longURL: urlDatabase[shortURL].longURL
+    shortURL,
+    longURL: urlDatabase[shortURL].longURL,
+    visits: urlDatabase[shortURL].visits,
+    visitors: urlDatabase[shortURL].visitors,
+    date: urlDatabase[shortURL].date,
   };
   
   res.render("urls_show", templateVariables);
@@ -148,6 +177,7 @@ app.post("/register", (req, res) => {
   //when we create a user then assign cookie
   if (user) {
     req.session.user_id = user.id;
+    req.session.visitor = user.id;
     return res.redirect("/urls");
   }
   
@@ -181,6 +211,7 @@ app.post("/login", (req, res)=> {
   }
   //after succssful login assign cookie
   req.session.user_id = users[userId].id;
+  req.session.visitor = users[userId].id;
 
   res.redirect("/urls");
 });
@@ -193,16 +224,20 @@ app.post("/urls", (req, res) => {
   
   //if user is not logged in
   if (!userId) {
-    return res.status(401).send("Please <a href='/login'>login</a> before accessing this page")
+    return res.status(401).send("Please <a href='/login'>login</a> before accessing this page");
   } else {
-    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: userId };
+    urlDatabase[shortURL] = {
+      longURL: req.body.longURL,
+      userID: userId,
+      visits: 0,
+      visitors: [],
+      date: []
+    };
     res.redirect(`/urls/${shortURL}`);
   }
     
   //if the shortURL does not exist
   if (!urlDatabase[shortURL]) {
-
-       
     return res.status(404).send("ShortURL does not exist");
   }
   
@@ -228,7 +263,7 @@ app.put("/urls/:shortURL", (req, res) => {
   //if user is logged in  but doesn't own URL return error message
   if (userId && (userId === urlDatabase[shortURL].userID)) {
     //updates the shortURL
-    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: userId };
+    urlDatabase[shortURL] = { longURL: req.body.longURL, userID: userId, visits: 0};
     return res.redirect("/urls");
     
   } else {
@@ -247,14 +282,11 @@ app.delete("/urls/:shortURL", (req, res)=> {
   if (!userId) {
     return res.status(401).send('Can\'t delete URL because you are not logged in!');
   }
-  
   //if user is logged in but soen't own URL
   if (userId && userId !== urlDatabase[shortURL].userID) {
     return res.status(401).send('Can\'t delete URL because you do not own it');
   }
-
   delete urlDatabase[shortURL];
-
   res.redirect("/urls");
 });
 
